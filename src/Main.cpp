@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "opencv2/videoio.hpp"
+#include "opencv2/video/video.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -49,6 +49,7 @@ int rotate_board = 1;
 VideoCapture cap;
 CheckersGame game;
 Mat frame;
+int human_turn, started;
 
 //Main function
 int main()
@@ -70,6 +71,9 @@ int main()
     namedWindow("Checkers", WINDOW_AUTOSIZE);
     setMouseCallback("Checkers", mouseEvents, NULL);
 
+	human_turn = 1; // 1 if its human turn, 0 if AI
+	started = 0; // checks if the game has started
+
     //Running state
     while(true)
     {
@@ -85,7 +89,20 @@ int main()
 
     	if(state == STATE_RUNNING)
     	{
-    		processImage();
+			if(started) {
+				if(human_turn) {
+					processImage();
+				}
+				else {
+					cout << "Waiting IA to play... ";
+					// somefunc
+					cout << "Human turn!" << endl;
+					human_turn = !human_turn;
+				}
+			}
+			else {
+				processImage();
+			}
     	}
     	else if(state == STATE_CALIB)
     	{
@@ -111,6 +128,17 @@ int main()
 		else if(key == 'n')
 		{
 			filter_noise = !filter_noise;
+		}
+		//Starts the game
+		else if(key == 'i')
+		{
+			started = !started;
+			cout << "start game" << endl;
+		}
+		//Ends a turn
+		else if(key == (char)10) // enter
+		{
+			human_turn = !human_turn;
 		}
     }
     destroyAllWindows();
@@ -257,6 +285,12 @@ void processImage()
 			putText(sum, "N -> Toogle Noise Filter", Point(10, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 1);
 			putText(sum, "ESC -> Exit", Point(10, 60), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 1);
 
+			if(started) 
+				if(human_turn)
+					putText(frame, "Human turn", Point(10, 80), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,0), 1);
+				else
+					putText(frame, "IA turn", Point(10, 80), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,255), 1);
+
 			//Display Image
 			imshow("Checkers", sum);
 			imshow("CheckersGameBoard", drawCheckersGame(Point2i(500,500), game));
@@ -268,6 +302,12 @@ void processImage()
 	putText(frame, "C -> Calibrate Color", Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 1);
 	putText(frame, "N -> Toogle Noise Filter", Point(10, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 1);
 	putText(frame, "ESC -> Exit", Point(10, 60), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 1);
+	if(started) 
+		if(human_turn)
+			putText(frame, "Human turn", Point(10, 80), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,0), 1);
+		else
+			putText(frame, "IA turn", Point(10, 80), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,255), 1);
+
 	putText(frame, "No board found!", Point(frame.cols/2-100, frame.rows/2), FONT_HERSHEY_SIMPLEX, 1, Scalar(255,255,255), 2);
 
 	//Display Image

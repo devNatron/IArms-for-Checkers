@@ -12,7 +12,7 @@ class SquareFinder
 		//Square detection configuration
 		static const int canny_upper_thresh = 30;
 		static const int thresh_it = 30;
-
+		
 	public:
 		//Returns sequence of squares detected on the image the sequence is stored in the specified memory storage
 		static vector<Quadrilateral> findSquares(Mat image)
