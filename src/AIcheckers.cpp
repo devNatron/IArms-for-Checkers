@@ -26,6 +26,7 @@ void AI::performMove(CheckersGame& game){
 }
 
 Move AI::minimax(CheckersGame& game, int player, int depth){
+    
     //check AI victory
     if(game.getPieces(_HUMAN) == 0){
         return Move(100);
@@ -34,26 +35,36 @@ Move AI::minimax(CheckersGame& game, int player, int depth){
         return Move(-100);
     }
     else if(depth == 3){
-        return ( game.getPieces(_AI) - game.getPieces(_HUMAN) );
+        return Move( (game.getPieces(_AI) - game.getPieces(_HUMAN)) );
     }
+    depth++;
 
     std::vector<Move> moves;
+    CheckersGame possibleState;
     for(int i=0; i < BOARD_SIZE; i++){
         for(int j=0; j < BOARD_SIZE; j++){
             if(game.board[i][j] == player){
-                moves = game.getValidMoves(j, i, player);
-                for(int k = 0; k < moves.size(); k++){
-                    CheckersGame possibleState = game.getNewState(moves[k], player);
+                std::vector<Move> validMoves = game.getValidMoves(j, i, player);
+                for(int k = 0; k < validMoves.size(); k++){
+                    possibleState = game.getNewState(validMoves[k], player);
+                    //possibleState.print();
                     if(player == _AI){
-                        moves[k].score = minimax(possibleState, _HUMAN, depth).score;
+                        validMoves[k].score = minimax(possibleState, _HUMAN, depth).score;
                     }
-                    else
-                        moves[k].score = minimax(possibleState, _AI, depth).score;
+                    else{
+                        validMoves[k].score = minimax(possibleState, _AI, depth).score;
+                    }
+                    moves.push_back(validMoves[k]);
                 }
             }
         }
     }
-
+    /* for(int k = 0; k < moves.size(); k++){
+        std::cout << "s:" << moves[k].score << " i:" << moves[k].i << " j:" << moves[k].j << " p:" << player << "\n";
+    } */
+    if(moves.size() == 0)
+        return Move(0);
+        
     int bestMove = 0;
     if(player == _AI){ //AI select the best move
         int bestScore = -1000000;

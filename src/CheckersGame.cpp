@@ -14,7 +14,9 @@ using namespace std;
 
 struct Move{
 	Move(){}
-	Move(int Score) : score(Score){}
+	Move(int Score){
+		score = Score;
+	}
     int j;
     int i;
 	int oldJ;
@@ -28,8 +30,6 @@ class CheckersGame
 {
 	public:
 		int board[BOARD_SIZE][BOARD_SIZE];
-		int piecesP1;
-		int piecesP2;
 
 		//Create a new game
 		CheckersGame()
@@ -42,8 +42,6 @@ class CheckersGame
 					this -> board[i][j] = 0;
 				}
 			}
-			piecesP1 = 12;
-			piecesP2 = 12;
 		}
 
 		//Print game board to cout
@@ -156,10 +154,7 @@ class CheckersGame
 
 		CheckersGame getNewState(Move move, int player){
 			CheckersGame newState;
-
 			newState.copyBoard(this->board);
-			newState.piecesP1 = this->piecesP1;
-			newState.piecesP2 = this->piecesP2;
 
 			int enemy;
 			player == 1 ? enemy = 2 : enemy = 1;
@@ -182,11 +177,11 @@ class CheckersGame
 			player == 1 ? enemy = 2 : enemy = 1;
 			if(this->board[move.i][move.j] == BLOCK_EMPTY){
 				this->board[move.i][move.j] = player;
-				this->board[move.oldJ][move.oldI] = BLOCK_EMPTY;
+				this->board[move.oldI][move.oldJ] = BLOCK_EMPTY;
 				return 0;
 			}
 			else if(this->board[move.i][move.j] == enemy){
-				this->board[move.oldJ][move.oldI] = BLOCK_EMPTY;
+				this->board[move.oldI][move.oldJ] = BLOCK_EMPTY;
 				this->board[move.i][move.j] = BLOCK_EMPTY;
 				this->board[move.capI][move.capJ] = player;
 				return 1;
@@ -194,7 +189,7 @@ class CheckersGame
 		}
 
 		bool validPos(int j, int i){
-			if (j >= 0 && j <= BOARD_SIZE-1 && i >= 0 && i <= BOARD_SIZE-1)
+			if (j >= 0 && j <= (BOARD_SIZE-1) && i >= 0 && i <= (BOARD_SIZE-1))
 				return true;
 			else
 				return false;
@@ -209,11 +204,18 @@ class CheckersGame
 		}
 
 		int getPieces(int player){
-			if(player == 1){
-				return piecesP1;
+			int pieces;
+			pieces = 0;
+
+			for(int i=0; i<BOARD_SIZE; i++){
+				for(int j=0; j<BOARD_SIZE; j++){
+					if(this->board[i][j] == player){
+						pieces++;
+					}
+				}
 			}
-			else
-				return piecesP2;
+
+			return pieces;
 		}
 };
 
