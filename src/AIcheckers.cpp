@@ -1,9 +1,11 @@
 #include "CheckersGame.cpp"
+#include <stdlib.h>
+#include <time.h>
 
 class AI {
     public:
         void init(int player);
-        void performMove(CheckersGame& game);
+        int performMove(CheckersGame& game);
     private:
         Move minimax(CheckersGame& game, int player, int depth);
         int _AI;
@@ -20,9 +22,20 @@ void AI::init(int aiPlayer){
     
 }
 
-void AI::performMove(CheckersGame& game){
+int AI::performMove(CheckersGame& game){
     Move bestMove = minimax(game, _AI, 0);
-    game.setState(bestMove, _AI);
+    if(bestMove.score == 777){
+        return -1;
+    }
+    else{
+        game.setState(bestMove, _AI);
+        if(game.getPieces(_HUMAN) == 0){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
 }
 
 Move AI::minimax(CheckersGame& game, int player, int depth){
@@ -62,10 +75,35 @@ Move AI::minimax(CheckersGame& game, int player, int depth){
     /* for(int k = 0; k < moves.size(); k++){
         std::cout << "s:" << moves[k].score << " i:" << moves[k].i << " j:" << moves[k].j << " p:" << player << "\n";
     } */
-    if(moves.size() == 0)
-        return Move(0);
-        
+    if(moves.size() == 0){
+        if(depth == 1)
+            return Move(777);
+        else
+            return Move(0);
+    }
+
+    std::vector<Move> bestMoves;
     int bestMove = 0;
+    
+    //verifica se há jogada de captura
+    int flag = 0;
+    for(int i=0; i < moves.size(); i++){
+        if(moves[i].capI != -1){
+            flag = 1;
+            break;
+        }
+    }
+    
+    //se houver, elimina todas jogadas de nao captura
+    if(flag){
+        for(int i=0; i < moves.size(); i++){
+            if(moves[i].capI == -1){
+                moves.erase(moves.begin()+i);
+                i--;
+            }
+        }
+    }
+
     if(player == _AI){ //AI select the best move
         int bestScore = -1000000;
         for(int i=0; i < moves.size(); i++){
@@ -85,5 +123,12 @@ Move AI::minimax(CheckersGame& game, int player, int depth){
         }
     }
 
-    return moves[bestMove];
+    for(int i=0; i < moves.size(); i++){
+        if(moves[i].score == moves[bestMove].score){
+            bestMoves.push_back(moves[i]);
+        }
+    }
+    srand (time(NULL));
+    int sortedMove = rand() % bestMoves.size();
+    return bestMoves[sortedMove];
 }
